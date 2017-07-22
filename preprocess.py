@@ -6,7 +6,7 @@ import pickle
 import random
 
 
-xmldoc = etree.parse("renju_dataset_only_games(full).txt") # contains 48688 games
+xmldoc = etree.parse("renju_dataset_only_games_full.txt") # contains 48688 games
 root = xmldoc.getroot()
 
 ## 하나의 게임에서
