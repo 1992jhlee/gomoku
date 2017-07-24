@@ -81,7 +81,7 @@ for epoch in range(training_epochs):
     for batch in range(total_batch):
         # get mini batch
         batch_mask = np.random.choice(len(training_inputs), batch_size)
-        random_features = [training_inputs[k] for k in (batch_mask]
+        random_features = [training_inputs[k] for k in batch_mask]
         random_labels = [training_labels[k] for k in batch_mask]
         batch_inputs = np.zeros([batch_size, 15, 15, 3], dtype=np.float32)
         batch_labels = np.zeros([batch_size, 225], dtype=np.float32)

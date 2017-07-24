@@ -86,7 +86,7 @@ print("raw data processing...fisined\n")
 
 # Divide into 3 sets(training set, validation set, test set)
 print("creating training set...")
-sample_index = list(range(48688))
+sample_index = list(range(len(input_features)))
 random.shuffle(sample_index)
 input_features = [input_features[k] for k in sample_index]
 labels = [labels[k] for k in sample_index]
