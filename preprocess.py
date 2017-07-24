@@ -86,8 +86,11 @@ print("raw data processing...fisined\n")
 
 # Divide into 3 sets(training set, validation set, test set)
 print("creating training set...")
-random.shuffle(input_features)
-random.shuffle(labels)
+sample_index = list(range(48688))
+random.shuffle(sample_index)
+input_features = [input_features[k] for k in sample_index]
+labels = [labels[k] for k in sample_index]
+
 
 # 80% of total data -> training set
 training_inputs = input_features[:int(0.8*len(input_features))]
