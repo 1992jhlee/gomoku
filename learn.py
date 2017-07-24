@@ -75,6 +75,7 @@ sess.run(tf.global_variables_initializer())
 training_epochs = 10
 print("start training..\n")
 for epoch in range(training_epochs):
+    print("learning epoch ", epoch)
     avg_cost = 0
     total_batch = int(len(training_inputs) / batch_size)
 
