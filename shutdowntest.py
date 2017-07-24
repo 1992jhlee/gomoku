@@ -1,1 +1,1 @@
-print(shutdownplz)
+print("shutdownplz")
