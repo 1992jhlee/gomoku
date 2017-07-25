@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import omokboard as ob
 import random
 import math
@@ -23,7 +25,7 @@ class Node:
         self.nextActions, self.actionsLength = self.getNextActions(board)
         self.gameFinished = isTerminal(self.board, self.currentAction, self.currentPlayer)
 
-    def getNextActions(self, board): 
+    def getNextActions(self, board):
         '''get positions that can be placed'''
         nextActions = []
         actionsLength = 0
@@ -60,23 +62,23 @@ class Node:
 
 
 
-selection_counter = 0       
+selection_counter = 0
 def selection(current):
 
-    
+
     global selection_counter
     selection_counter += 1
     print("selection started...", selection_counter)
-    
+
     if current.gameFinished == True: # 게임이 끝났으면 None 반환
         return None
-    
+
     while True: # 게임이 끝나거나 둘 곳이 없으면 작동 x
 
         if current.actionsLength > 0: # if not fully expanded
             newnode = expansion(current)
             print("newnode created")
-            return newnode         
+            return newnode
         else:
             select = getBestChild(current)
             print("best node selected")
@@ -84,8 +86,8 @@ def selection(current):
 
 
     return select
-    
-    
+
+
 
 expansion_counter = 0
 def expansion(node):
@@ -97,15 +99,15 @@ def expansion(node):
 
 
     while True:
-        
+
         nextboard = copy.deepcopy(node.board)
         nextaction = rolloutPolicy(nextboard, node.nextActions, node.currentPlayer)
         #idx = random.randint(0, node.actionsLength-1)
         #nextaction = node.nextActions[idx]
-        
+
         if ob.putStoneOnBoard(nextboard, nextaction[0], nextaction[1], node.opponent) == False:
             continue
-        
+
         newnode = Node(nextboard, nextaction, node.opponent)
         newnode.parent = node
         break
@@ -114,7 +116,7 @@ def expansion(node):
     node.children.append(newnode)
     del(node.nextActions[node.nextActions.index(nextaction)])
     node.actionsLength -= 1
-    
+
     return newnode
 
 
@@ -123,7 +125,7 @@ def expansion(node):
 def rollout_random(node):
 
     #print("rollout start")
-    
+
     # check if there is a winner
     if findWinner(node.board, node.currentPlayer) == node.currentPlayer:
         return 1
@@ -132,7 +134,7 @@ def rollout_random(node):
 
     # draw case
     if node.actionsLength == 0:
-        return 0   
+        return 0
 
     # simulation
     temp_board = copy.deepcopy(node.board)
@@ -151,14 +153,14 @@ def rollout_random(node):
             continue
         else:
             break
-    
+
     if winner == node.currentPlayer:
         print(temp_board)
         return 1
     else:
         return 0
 
-        
+
 
 
 backprop_counter = 0
@@ -175,11 +177,11 @@ def backprop(current, value):
         current = current.parent
         if current.parent == None:
             break
-    
-    
 
 
-# 해당 좌표에 돌을 놓을 시, 승자 반환 
+
+
+# 해당 좌표에 돌을 놓을 시, 승자 반환
 def getWinner(board, row, column):
     if ob.winCount(board, row, column, 'B') == True:
         if ob.colorCheck(board, row, column, 'B') == 'B':
@@ -197,7 +199,7 @@ def winCheck(board, row, column, BorW):
     if ob.winCount(board, row, column, BorW) == True:
         return BorW
     else:
-        return False 
+        return False
 
 
 
@@ -210,12 +212,12 @@ def findWinner(board, BorW):
     for row in range(size):
         for column in range(size):
             if ob.colorCheck(board, row, column, BorW) == BorW and winCheck(board, row, column, BorW) == BorW:
-                
+
                 return BorW
-            
+
     return None
 
-    
+
 
 def isTerminal(board, position, BorW):
         # position = [row, column]
@@ -223,7 +225,7 @@ def isTerminal(board, position, BorW):
             return True
         else:
             return False
-   
+
 
 
 
@@ -257,7 +259,7 @@ def getBestAction(root, limit_time=10):
         current = selection(root)
         value = rollout(current)
         backprop(current, value)
-        
+
         spent_time = time.time() - start_time
         total_time += spent_time
         if total_time > limit_time:
@@ -266,7 +268,7 @@ def getBestAction(root, limit_time=10):
             rollout_counter = 0
             backprop_counter = 0
             break
-        
+
     bestChild, bestChildren = getBestChild(root, getChildList = True)
 
     for child in bestChildren:
@@ -284,7 +286,7 @@ def rollout(node):
     global rollout_counter
     rollout_counter += 1
     print("rollout started...", rollout_counter)
-    
+
     # check if there is a winner
     if findWinner(node.board, node.currentPlayer) == node.currentPlayer:
         return 1
@@ -293,8 +295,8 @@ def rollout(node):
 
     # draw case
     if node.actionsLength == 0:
-        return 0   
-    
+        return 0
+
     # simulation
     temp_board = copy.deepcopy(node.board)
     temp_nextActions = copy.deepcopy(node.nextActions)
@@ -304,7 +306,7 @@ def rollout(node):
         currentPlayer = ob.getOpponentPlayer(currentPlayer) # player change
         nextmove = rolloutPolicy(temp_board, temp_nextActions, currentPlayer) # next action chosen by rollout policy
         print("nextmove = ", nextmove)
-        del(temp_nextActions[temp_nextActions.index(nextmove)]) # delete current action        
+        del(temp_nextActions[temp_nextActions.index(nextmove)]) # delete current action
         if ob.putStoneOnBoard(temp_board, nextmove[0], nextmove[1], currentPlayer) == False:
             continue
         ob.drawCurrentBoard(temp_board)
@@ -315,13 +317,13 @@ def rollout(node):
             continue
         else:
             break
-    
+
     if winner == node.currentPlayer:
         return 1
     else:
         return 0
 
-        
+
 
 
 
@@ -331,7 +333,7 @@ def rolloutPolicy(board, nextActions, currentPlayer):
     first, check if there is a place to defend
     and then choose a place where the number of stones placed in line increased
     '''
-    
+
     cnt_4 = []
     cnt_3 = []
     cnt_2 = []
@@ -349,7 +351,7 @@ def rolloutPolicy(board, nextActions, currentPlayer):
             # 상대방이 놓으면 무조건 지는 포지션 먼저 검사
             nextmove = action
             break
-        
+
         if opponent_cnt == 4:
             if checkSpaceInRow(board, action, direction, ob.getOpponentPlayer(currentPlayer)) == True:
                 continue
@@ -357,7 +359,7 @@ def rolloutPolicy(board, nextActions, currentPlayer):
             nextmove = action
             break
 
-                                    
+
         # find attack position
         my_cnt = ob.cntStoneInDirection(board, action[0], action[1], currentPlayer)
         if winCheck(board, action[0], action[1], currentPlayer) == currentPlayer:
@@ -372,7 +374,7 @@ def rolloutPolicy(board, nextActions, currentPlayer):
         else:
             others.append(action)
     # for문 종료
-        
+
     if nextmove == None:
         if len(cnt_4) > 0:
             nextmove = random.choice(cnt_4)
@@ -397,7 +399,7 @@ def getEarlyStageAction(board, currentAction):
     next player select a one of the eight adjacent positions.
     Becaus rollout policy does not work well when there are few stones in the beginning.
     '''
-    
+
 
     row = currentAction[0]
     column = currentAction[1]
@@ -410,8 +412,8 @@ def getEarlyStageAction(board, currentAction):
             [row-1, column],
             [row, column+1],
             [row, column-1]]
-    
-    while True:    
+
+    while True:
         nextmove = random.choice(near)
         if ob.IsInBorder(nextmove[0], nextmove[1], size) == False or ob.isEmpty(board, nextmove[0], nextmove[1]) == False:
             continue
@@ -419,14 +421,14 @@ def getEarlyStageAction(board, currentAction):
             break
 
     return nextmove
-        
+
 
 
 def checkSpaceInRow(board, action, direction, BorW):
     '''
     check if a shape of stone row is like o_ooo
     '''
-    
+
     row = action[0]
     column = action[1]
     near = [[row + direction[0], column + direction[1]],
@@ -435,14 +437,14 @@ def checkSpaceInRow(board, action, direction, BorW):
         return True
     else:
         return False
-        
+
 
 
 def getDensePlace(board, nextActions):
     '''
     Find dense places by counting the number of stones around''
     '''
-    
+
     directions = [(0, 1), (1, 1), (1, 0), (1, -1)]
     empty_cnt_list = []
     empty_cnt = 0
@@ -458,12 +460,12 @@ def getDensePlace(board, nextActions):
                 empty_cnt += 1
             else:
                 pass
-            
+
         empty_cnt_list.append(empty_cnt)
-    
+
     idx = empty_cnt_list.index(min(empty_cnt_list))
     densePlace = nextActions[idx]
-    
+
     return densePlace
 
 '''
@@ -548,7 +550,7 @@ while True:
         else:
             break
 
-    
+
     root = Node(board, [my_action_row, my_action_col], 'B')
     #root.printNodeInfo()
     #rest = input()
@@ -560,20 +562,20 @@ while True:
         random_actions = copy.deepcopy(root.nextActions)
         radnom_actions = random.shuffle(random_actions)
         # defence check
-        for action in random_actions:    
+        for action in random_actions:
             direction, opponent_cnt = ob.cntStoneInDirection(root.board, action[0], action[1], root.currentPlayer, with_direction=True)
             #print(action, opponent_cnt)
             if winCheck(root.board, action[0], action[1], root.currentPlayer) == root.currentPlayer:
                 nextmove = action
                 break
-            
+
             if opponent_cnt == 4:
                 if checkSpaceInRow(root.board, action, direction, root.currentPlayer) == True:
                     continue
 
                 nextmove = action
                 break
-        
+
     if nextmove == None:
         nextmove = getBestAction(root, 3)
 

@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
+
 import numpy as np
-                                                   
+
 
 
 def getOpponentPlayer(BorW):
@@ -15,7 +17,7 @@ def getEmptyBoard(size):
     '''
     create empty board
     '''
-    
+
     board = []
     for i in range(size):
         board.append([0]*size)
@@ -28,11 +30,11 @@ def drawCurrentBoard(board):
     '''
     draw current board
     '''
-    
+
     lines = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
     line = " "
     size = len(board[0])
-    
+
     for i in range(size+1):
         if i == 0:
             for j in range(size):
@@ -43,7 +45,7 @@ def drawCurrentBoard(board):
                         line = "○"
                     else:
                         line = "┌"
-                        
+
                 elif j == size-1:
                     if i < size and j < size and board[i][j] == 1:
                         line += "●" + lines[len(board[0])-i-1]
@@ -58,7 +60,7 @@ def drawCurrentBoard(board):
                         line += "○"
                     else:
                         line += "┬"
-                    
+
         elif i == size-1:
             for j in range(size):
                 if j == 0:
@@ -84,12 +86,12 @@ def drawCurrentBoard(board):
                         line += "○"
                     else:
                         line += "┴"
-                    
+
         elif i == size:
             line = ""
-            for j in range(size):               
+            for j in range(size):
                 line += lines[j] + " "
-                
+
         else:
             for j in range(size):
                 if j == 0:
@@ -115,8 +117,8 @@ def drawCurrentBoard(board):
                     else:
                         line += "┼"
 
-    
-        
+
+
         print(line)
 
 
@@ -129,7 +131,7 @@ def isEmpty(board, row, column):
     empty :     return True
     not empty : return False
     '''
-    
+
     size = len(board[0])-1
     if row < 0 or row > size or column < 0 or column > size:
         print("wrong position")
@@ -157,7 +159,7 @@ def colorCheck(board, row, column, BorW):
         #print(row, column)
         #print("wrong position")
         return 'error'
-        
+
     if BorW == 'B':
         if board[row][column] == 1:
             return True
@@ -175,12 +177,12 @@ def colorCheck(board, row, column, BorW):
         else:
             return None
 
-        
+
 def putStoneOnBoard(board, row, column, BorW):
     '''
     put stone of the same color as BorW on the position board[row][column]
     '''
-    
+
     # check availability
     if not isEmpty(board, row, column):
         print("not empty")
@@ -209,8 +211,8 @@ def winCount(board, row, column, BorW):
     if BorW wins : return True
     other cases  : return False
     '''
-    
-    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙  
+
+    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
     cnt = 1
     color = BorW
     ref_point_x = row
@@ -223,21 +225,21 @@ def winCount(board, row, column, BorW):
         drow_ = -direction[i][0]
         dcolumn_ = -direction[i][1]
 
-        
+
         for j in range(1, 5):
             if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color):
                 cnt += 1
             else:
                 break
-            
-        # inverse direction    
+
+        # inverse direction
         for j in range(1, 5):
             if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color):
                 cnt += 1
             else:
@@ -259,8 +261,8 @@ def winCount(board, row, column, BorW):
 
 
 def cntStoneInDirection(board, row, column, BorW, with_direction=False):
-    
-    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙  
+
+    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
     cnt = 1
     color = BorW
     ref_point_x = row
@@ -275,15 +277,15 @@ def cntStoneInDirection(board, row, column, BorW, with_direction=False):
         drow_ = -direction[i][0]
         dcolumn_ = -direction[i][1]
 
-        
+
         for j in range(1, 6): # 레퍼런스 기준으로 +- 5개 위치 확인
             if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
                 #print("first")
                 cnt += 1
-                  
+
             elif colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == False: # 막혀있는지 확인
                 #print("second")
                 cnt -= 1
@@ -297,16 +299,16 @@ def cntStoneInDirection(board, row, column, BorW, with_direction=False):
                 break
             #print(cnt)
         #print(direction[i], "정방향 = ", cnt)
-        
-        # inverse direction    
+
+        # inverse direction
         for j in range(1, 6):
             if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
                 #print("first-")
                 cnt += 1
-            
+
             elif colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == False:
                 #print("second-")
                 cnt -= 1
@@ -321,7 +323,7 @@ def cntStoneInDirection(board, row, column, BorW, with_direction=False):
             #print(cnt)
         #print(direction[i], "역방향 = ", cnt)
 
-        
+
         cnt_list.append(cnt)
         direction_list.append(direction[i])
         cnt = 1
@@ -343,7 +345,7 @@ def check33_violation(board, row, column, BorW):
     violated     : return True
     not violated : return False
     '''
-    
+
     direction = [(1, 0), (1, -1), (0, -1), (-1, -1)] # → ↘ ↓ ↙
     color = BorW
     cnt = 1
@@ -358,21 +360,21 @@ def check33_violation(board, row, column, BorW):
         drow_ = -direction[i][0]
         dcolumn_ = -direction[i][1]
 
-        
+
         for j in range(1, 5):
             if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color):
                 cnt += 1
             else:
                 break
-            
-        # inverse direction    
+
+        # inverse direction
         for j in range(1, 5):
             if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
                 continue
-            
+
             if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color):
                 cnt += 1
             else:
@@ -394,12 +396,9 @@ def check33_violation(board, row, column, BorW):
 
 
 
-        
+
 def IsInBorder(row, column, size):
     if row < 0 or row > size-1 or column < 0 or column > size-1:
         return False # out of border
     else:
         return True # in the border
-
-
-
