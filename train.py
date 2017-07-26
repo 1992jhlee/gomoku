@@ -106,11 +106,11 @@ with tf.Session() as sess:
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), file=f)
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
         if epoch % 10 == 0:
-            save_path = saver.save(sess, str(os.getcwd()) + "\\trained_model\\trained_model_at_epoch" + str(epoch) + ".ckpt")
+            save_path = saver.save(sess, str(os.getcwd()) + "/trained_model/trained_model_at_epoch" + str(epoch) + ".ckpt")
             print("Model saved in file: %s" % save_path)
 
     # save completely trained model
-    save_path = saver.save(sess, str(os.getcwd()) + "\\trained_model\\trained_model.ckpt")
+    save_path = saver.save(sess, str(os.getcwd()) + "/trained_model/trained_model.ckpt")
     print("Model saved in file: %s" % save_path)
 
     f.close()
