@@ -71,7 +71,7 @@ logits = tf.matmul(L5_flat, W6) + b
 
 # define cost and optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
-optimizer = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
 
 
 # Add ops to save and restore all the variables.
