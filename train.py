@@ -23,7 +23,7 @@ print("loading data files...finished")
 print("len(training_inputs) = ", len(training_inputs))
 print("len(test_inputs) = ", len(test_inputs))
 ####
-batch_size = 128
+batch_size = 32
 
 # ConvNet
 X = tf.placeholder(tf.float32, [None, 15, 15, 3])
@@ -32,28 +32,32 @@ X = tf.placeholder(tf.float32, [None, 15, 15, 3])
 Y = tf.placeholder(tf.float32, [None, 225])
 # Y = tf.placeholder(tf.float32, [1, 225])
 
-W1 = tf.Variable(tf.random_normal([7, 7, 3, 256], stddev=0.1), name="W1")
+W1 = tf.Variable(tf.random_normal([7, 7, 3, 128], stddev=0.1), name="W1")
 L1 = tf.nn.conv2d(X, W1, strides=[1, 1, 1, 1], padding='SAME')
 L1 = tf.nn.relu(L1) # output shape = (1, 15, 15, 128)
 
-W2 = tf.Variable(tf.random_normal([5, 5, 256, 256], stddev=0.1), name="W2")
+W2 = tf.Variable(tf.random_normal([5, 5, 128, 128], stddev=0.1), name="W2")
 L2 = tf.nn.conv2d(L1, W2, strides=[1, 1, 1, 1], padding='SAME')
 L2 = tf.nn.relu(L2) # output shape = (1, 15, 15, 128)
 
-W3 = tf.Variable(tf.random_normal([3, 3, 256, 256], stddev=0.1), name="W3")
+W3 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W3")
 L3 = tf.nn.conv2d(L2, W3, strides=[1, 1, 1, 1], padding='SAME')
 L3 = tf.nn.relu(L3) # output shape = (1, 15, 15, 128)
 
-W4 = tf.Variable(tf.random_normal([3, 3, 256, 256], stddev=0.1), name="W4")
+W4 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W4")
 L4 = tf.nn.conv2d(L3, W4, strides=[1, 1, 1, 1], padding='SAME')
 L4 = tf.nn.relu(L4) # output shape = (1, 15, 15, 128)
-L4_flat = tf.reshape(L4, [-1, 15*15*256])
+
+W5 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W5")
+L5 = tf.nn.conv2d(L4, W5, strides=[1, 1, 1, 1], padding='SAME')
+L5 = tf.nn.relu(L5) # output shape = (1, 15, 15, 128)
+L5_flat = tf.reshape(L5, [-1, 15*15*128])
 
 # FCNN
-W5 = tf.get_variable("W5", shape=[15*15*256, 225],
+W6 = tf.get_variable("W6", shape=[15*15*128, 225],
                     initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([225]))
-logits = tf.matmul(L4_flat, W5) + b
+logits = tf.matmul(L5_flat, W6) + b
 
 ### 1*1 kernal instead of the FC layers
 #W5 = tf.Variable(tf.random_normal([1, 1, 256, 1], stddev=0.1))
@@ -67,7 +71,7 @@ logits = tf.matmul(L4_flat, W5) + b
 
 # define cost and optimizer
 cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=logits, labels=Y))
-optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
+optimizer = tf.train.AdamOptimizer(learning_rate=0.01).minimize(cost)
 
 
 # Add ops to save and restore all the variables.
@@ -77,11 +81,10 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 500
+    training_epochs = 35
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
-        print("learning epoch ", epoch)
         avg_cost = 0
         total_batch = int(len(training_inputs) / batch_size)
         for batch in range(total_batch):
@@ -102,8 +105,11 @@ with tf.Session() as sess:
 
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), file=f)
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
+        if epoch % 10 == 0:
+            save_path = saver.save(sess, str(os.getcwd()) + "\\trained_model\\trained_model_at_epoch" + str(epoch) + ".ckpt")
+            print("Model saved in file: %s" % save_path)
 
-    # save model
+    # save completely trained model
     save_path = saver.save(sess, str(os.getcwd()) + "\\trained_model\\trained_model.ckpt")
     print("Model saved in file: %s" % save_path)
 
