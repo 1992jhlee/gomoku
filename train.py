@@ -23,7 +23,7 @@ print("loading data files...finished")
 print("len(training_inputs) = ", len(training_inputs))
 print("len(test_inputs) = ", len(test_inputs))
 ####
-batch_size = 32
+batch_size = 128
 
 # ConvNet
 X = tf.placeholder(tf.float32, [None, 15, 15, 3])
@@ -47,17 +47,17 @@ L3 = tf.nn.relu(L3) # output shape = (1, 15, 15, 128)
 W4 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W4")
 L4 = tf.nn.conv2d(L3, W4, strides=[1, 1, 1, 1], padding='SAME')
 L4 = tf.nn.relu(L4) # output shape = (1, 15, 15, 128)
-
-W5 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W5")
-L5 = tf.nn.conv2d(L4, W5, strides=[1, 1, 1, 1], padding='SAME')
-L5 = tf.nn.relu(L5) # output shape = (1, 15, 15, 128)
-L5_flat = tf.reshape(L5, [-1, 15*15*128])
+L4_flat = tf.reshape(L4, [-1, 15*15*128])
+#W5 = tf.Variable(tf.random_normal([3, 3, 128, 128], stddev=0.1), name="W5")
+#L5 = tf.nn.conv2d(L4, W5, strides=[1, 1, 1, 1], padding='SAME')
+#L5 = tf.nn.relu(L5) # output shape = (1, 15, 15, 128)
+#L5_flat = tf.reshape(L5, [-1, 15*15*128])
 
 # FCNN
-W6 = tf.get_variable("W6", shape=[15*15*128, 225],
+W5 = tf.get_variable("W5", shape=[15*15*128, 225],
                     initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([225]))
-logits = tf.matmul(L5_flat, W6) + b
+logits = tf.matmul(L4_flat, W5) + b
 
 ### 1*1 kernal instead of the FC layers
 #W5 = tf.Variable(tf.random_normal([1, 1, 256, 1], stddev=0.1))
@@ -81,7 +81,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 35
+    training_epochs = 30
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
