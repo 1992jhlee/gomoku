@@ -81,7 +81,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 30
+    training_epochs = 50
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
