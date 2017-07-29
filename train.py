@@ -117,12 +117,16 @@ with tf.Session() as sess:
     print('training finished!')
 
 
+try:
     # Test model and check accuracy
     print('Testing model...')
-    f = open("Testing_log.txt", "w")
+    f = open("testing_log.txt", "w")
     correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}), file=f)
     print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}))
     f.close()
     print('Testing model...finished')
+except Exception as e:
+    print(e)
+    print(type(e))
