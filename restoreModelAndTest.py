@@ -69,10 +69,15 @@ with tf.Session() as sess:
             correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 
+            accuracy_list = []
             for k in range(len(total_batch_inputs)):
-                print(k, 'th Accuracy:', sess.run(accuracy, \
-                            feed_dict={X:total_batch_inputs[k], Y:total_batch_labels[k]}), file=f)
+                result = sess.run(accuracy, \
+                            feed_dict={X:total_batch_inputs[k], Y:total_batch_labels[k]})
+                print("type(result) = ", type(result))
+                print(k, 'th Accuracy:', result, file=f)
+                accuracy_list.append(result)
 
+            print("MEAN = ", tf.reduce_mean(accuracy_list))
             print('Testing model...finished')
         except Exception as e:
             print(e, file=f)
