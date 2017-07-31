@@ -52,8 +52,10 @@ logits = tf.matmul(L4_flat, W5) + b
 
 
 
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
 
-with tf.Session() as sess:
+with tf.Session(config=config) as sess:
     saver = tf.train.Saver()
     saver.restore(sess, "../training_7_20170729/trained_model.ckpt")
     print("Model Restored")
