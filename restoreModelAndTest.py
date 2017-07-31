@@ -11,10 +11,10 @@ with open('test_labels.txt', 'rb') as f:
     test_labels = pickle.load(f)
 print("loading testing files...finished")
 
-test_inputs = test_inputs[:int(0.225*len(test_inputs))]
-test_labels = test_labels[:int(0.225*len(test_labels))]
+total_batch_inputs = [test_inputs[i:i+1000] for i in range(0, len(test_inputs), 1000)]
+total_batch_labels = [test_labels[i:i+1000] for i in range(0, len(test_labels), 1000)]
 
-print("len(test_inputs) = ", len(test_inputs))
+print("len(total_batch_inputs) = ", len(total_batch_inputs))
 
 # ConvNet
 X = tf.placeholder(tf.float32, [None, 15, 15, 3])
@@ -51,11 +51,13 @@ b = tf.Variable(tf.random_normal([225]))
 logits = tf.matmul(L4_flat, W5) + b
 
 
+print("logits.shape = ", logits.shape)
+print("Y.shape = ", Y.shape)
+#config = tf.ConfigProto()
+#config.gpu_options.allow_growth = True
 
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True
 
-with tf.Session(config=config) as sess:
+with tf.Session() as sess:
     saver = tf.train.Saver()
     saver.restore(sess, "../training_7_20170729/trained_model.ckpt")
     print("Model Restored")
@@ -66,7 +68,11 @@ with tf.Session(config=config) as sess:
             print('Testing model...')
             correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}), file=f)
+
+            for k in range(len(total_batch_inputs)):
+                print(k, 'th Accuracy:', sess.run(accuracy, \
+                            feed_dict={X:total_batch_inputs[k], Y:total_batch_labels[k]}), file=f)
+
             print('Testing model...finished')
         except Exception as e:
             print(e, file=f)
