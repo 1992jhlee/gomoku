@@ -73,11 +73,10 @@ with tf.Session() as sess:
             for k in range(len(total_batch_inputs)):
                 result = sess.run(accuracy, \
                             feed_dict={X:total_batch_inputs[k], Y:total_batch_labels[k]})
-                print("type(result) = ", type(result))
                 print(k, 'th Accuracy:', result, file=f)
                 accuracy_list.append(result)
 
-            print("MEAN = ", tf.reduce_mean(accuracy_list))
+            print("MEAN = ", sess.run(tf.reduce_mean(accuracy_list)), file=f)
             print('Testing model...finished')
         except Exception as e:
             print(e, file=f)
