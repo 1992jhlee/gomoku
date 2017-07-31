@@ -11,8 +11,10 @@ with open('test_labels.txt', 'rb') as f:
     test_labels = pickle.load(f)
 print("loading testing files...finished")
 
-print("len(test_inputs) = ", len(test_inputs))
+test_inputs = test_inputs[:int(0.25*len(test_inputs)]
+test_labels = test_labels[:int(0.25*len(test_labels)]
 
+print("len(test_inputs) = ", len(test_inputs))
 
 # ConvNet
 X = tf.placeholder(tf.float32, [None, 15, 15, 3])
