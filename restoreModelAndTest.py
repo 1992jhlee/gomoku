@@ -53,7 +53,7 @@ logits = tf.matmul(L4_flat, W5) + b
 
 with tf.Session() as sess:
     saver = tf.train.Saver()
-    saver.restore(sess, str(os.getcwd()) + "../training_7_20170729/trained_model.ckpt")
+    saver.restore(sess, "../training_7_20170729/trained_model.ckpt")
     print("Model Restored")
 
     with open("testing_log.txt", "w") as f:
