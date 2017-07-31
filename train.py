@@ -81,7 +81,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 50
+    training_epochs = 5
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
@@ -116,17 +116,14 @@ with tf.Session() as sess:
     f.close()
     print('training finished!')
 
-
-try:
-    # Test model and check accuracy
-    print('Testing model...')
-    f = open("testing_log.txt", "w")
-    correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
-    accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-    print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}), file=f)
-    print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}))
-    f.close()
-    print('Testing model...finished')
-except Exception as e:
-    print(e)
-    print(type(e))
+    with open("testing_log.txt", "w") as f:
+        try:
+            # Test model and check accuracy
+            print('Testing model...')
+            correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
+            accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+            print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}), file=f)
+            print('Testing model...finished')
+        except Exception as e:
+            print(e, file=f)
+            print(type(e), file=f)
