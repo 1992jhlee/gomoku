@@ -81,7 +81,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 5
+    training_epochs = 60
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
@@ -105,7 +105,7 @@ with tf.Session() as sess:
 
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), file=f)
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
-        if epoch % 10 == 0:
+        if (epoch+1) % 10 == 0:
             save_path = saver.save(sess, str(os.getcwd()) + "//trained_model//trained_model_at_epoch" + str(epoch) + ".ckpt")
             print("Model saved in file: %s" % save_path)
 
