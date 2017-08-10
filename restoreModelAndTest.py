@@ -59,7 +59,7 @@ print("Y.shape = ", Y.shape)
 
 with tf.Session() as sess:
     saver = tf.train.Saver()
-    saver.restore(sess, "../training_8_20170729/trained_model_at_epoch60.ckpt")
+    saver.restore(sess, "../training_8_20170801/trained_model_at_epoch60.ckpt")
     print("Model Restored")
 
     with open("testing_log.txt", "w") as f:
