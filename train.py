@@ -57,7 +57,7 @@ L4_flat = tf.reshape(L4, [-1, 15*15*256])
 W5 = tf.get_variable("W5", shape=[15*15*256, 225],
                     initializer=tf.contrib.layers.xavier_initializer())
 b = tf.Variable(tf.random_normal([225]))
-logits = tf.matmul(L4_flat, W5) + b
+logits = tf.matmul(L4_flat, W5) + b # logits.shape = (?, 225)
 
 ### 1*1 kernal instead of the FC layers
 #W5 = tf.Variable(tf.random_normal([1, 1, 256, 1], stddev=0.1))
@@ -81,7 +81,7 @@ with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     tf.train.start_queue_runners(sess)
 
-    training_epochs = 60
+    training_epochs = 100
     print("start training..\n")
     f = open("training_log.txt", "w")
     for epoch in range(training_epochs):
@@ -106,7 +106,7 @@ with tf.Session() as sess:
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost), file=f)
         print('Epoch:', '%04d' % (epoch + 1), 'cost =', '{:.9f}'.format(avg_cost))
         if (epoch+1) % 10 == 0:
-            save_path = saver.save(sess, str(os.getcwd()) + "//trained_model//trained_model_at_epoch" + str(epoch) + ".ckpt")
+            save_path = saver.save(sess, str(os.getcwd()) + "//trained_model//trained_model_at_epoch" + str(epoch+1) + ".ckpt")
             print("Model saved in file: %s" % save_path)
 
     # save completely trained model
@@ -120,10 +120,20 @@ with tf.Session() as sess:
         try:
             # Test model and check accuracy
             print('Testing model...')
+            total_test_batch_inputs = [test_inputs[i:i+1000] for i in range(0, len(test_inputs), 1000)]
+            total_test_batch_labels = [test_labels[i:i+1000] for i in range(0, len(test_labels), 1000)]
+
             correct_prediction = tf.equal(tf.argmax(logits, 1), tf.argmax(Y, 1))
             accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-            print('Accuracy:', sess.run(accuracy, feed_dict={X:test_inputs, Y:test_labels}), file=f)
-            print('Testing model...finished')
+
+            accuracy_list = []
+            for k in range(len(total_test_batch_inputs)):
+                result = sess.run(accuracy, \
+                            feed_dict={X:total_test_batch_inputs[k], Y:total_test_batch_labels[k]})
+                print(k, 'th Accuracy:', result, file=f)
+                accuracy_list.append(result)
+
+            print("MEAN = ", sess.run(tf.reduce_mean(accuracy_list)), file=f)
         except Exception as e:
             print(e, file=f)
             print(type(e), file=f)
