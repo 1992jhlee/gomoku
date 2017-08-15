@@ -3,402 +3,651 @@
 import numpy as np
 
 
-
-def getOpponentPlayer(BorW):
-    if BorW == 'B':
-        return 'W'
-    else:
-        return 'B'
+class Board:
 
 
-
-
-def getEmptyBoard(size):
-    '''
-    create empty board
-    '''
-
-    board = []
-    for i in range(size):
-        board.append([0]*size)
-    return board
-
-
-
-
-def drawCurrentBoard(board):
-    '''
-    draw current board
-    '''
-
-    lines = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
-    line = " "
-    size = len(board[0])
-
-    for i in range(size+1):
-        if i == 0:
-            for j in range(size):
-                if j == 0:
-                    if i < size and j < size and board[i][j] == 1:
-                        line = "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line = "○"
-                    else:
-                        line = "┌"
-
-                elif j == size-1:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●" + lines[len(board[0])-i-1]
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○" + lines[len(board[0])-i-1]
-                    else:
-                        line += "┐" + lines[len(board[0])-1]
-                else:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○"
-                    else:
-                        line += "┬"
-
-        elif i == size-1:
-            for j in range(size):
-                if j == 0:
-                    if i < size and j < size and board[i][j] == 1:
-                        line = "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line = "○"
-                    else:
-                        line = "└"
-
-                elif j == size-1:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●" + lines[len(board[0])-i-1]
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○" + lines[len(board[0])-i-1]
-                    else:
-                        line += "┘" + lines[len(board[0])-i-1]
-
-                else:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○"
-                    else:
-                        line += "┴"
-
-        elif i == size:
-            line = ""
-            for j in range(size):
-                line += lines[j] + " "
-
+    def __init__(self, size, board):
+        self.size = size
+        if board == "EMPTY":
+            self.board = self.getEmptyBoard(size)
         else:
-            for j in range(size):
-                if j == 0:
-                    if i < size and j < size and board[i][j] == 1:
-                        line = "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line = "○"
+            self.board = self.setBoard(board)
+
+
+    def setBoard(self, board):
+        temp_board = self.getEmptyBoard(self.size)
+        for row in range(self.size):
+            for column in range(self.size):
+                temp_board[row][column] = board[row][column]
+
+        return temp_board
+
+
+    def getEmptyBoard(self, size):
+        # create empty board
+        board = []
+        for i in range(size):
+            board.append([0]*size)
+        return board
+
+
+    def getOpponentPlayer(self, BorW):
+        if BorW == 'B':
+            return 'W'
+        else:
+            return 'B'
+
+
+    def drawCurrentBoard(self):
+        #draw current board
+
+        lines = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o']
+        line = " "
+
+        for i in range(self.size+1):
+            if i == 0:
+                for j in range(self.size):
+                    if j == 0:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line = "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line = "○"
+                        else:
+                            line = "┌"
+
+                    elif j == self.size-1:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●" + lines[self.size-i-1]
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○" + lines[self.size-i-1]
+                        else:
+                            line += "┐" + lines[self.size-1]
                     else:
-                        line = "├"
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○"
+                        else:
+                            line += "┬"
 
-                elif j == size-1:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●" + lines[len(board[0])-i-1]
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○" + lines[len(board[0])-i-1]
+            elif i == self.size-1:
+                for j in range(self.size):
+                    if j == 0:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line = "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line = "○"
+                        else:
+                            line = "└"
+
+                    elif j == self.size-1:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●" + lines[self.size-i-1]
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○" + lines[self.size-i-1]
+                        else:
+                            line += "┘" + lines[self.size-i-1]
+
                     else:
-                        line += "┤" + lines[len(board[0])-i-1]
-                else:
-                    if i < size and j < size and board[i][j] == 1:
-                        line += "●"
-                    elif i < size and j < size and board[i][j] == -1:
-                        line += "○"
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○"
+                        else:
+                            line += "┴"
+
+            elif i == self.size:
+                line = ""
+                for j in range(self.size):
+                    line += lines[j] + " "
+
+            else:
+                for j in range(self.size):
+                    if j == 0:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line = "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line = "○"
+                        else:
+                            line = "├"
+
+                    elif j == self.size-1:
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●" + lines[self.size-i-1]
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○" + lines[self.size-i-1]
+                        else:
+                            line += "┤" + lines[self.size-i-1]
                     else:
-                        line += "┼"
+                        if i < self.size and j < self.size and self.board[i][j] == 1:
+                            line += "●"
+                        elif i < self.size and j < self.size and self.board[i][j] == -1:
+                            line += "○"
+                        else:
+                            line += "┼"
+
+            print(line)
 
 
-
-        print(line)
-
-
-
-
-
-def isEmpty(board, row, column):
-    '''
-    check board[row][column] is empty
-    empty :     return True
-    not empty : return False
-    '''
-
-    size = len(board[0])-1
-    if row < 0 or row > size or column < 0 or column > size:
-        print("wrong position")
-        return False
-
-    if board[row][column] == 0:
-        return True
-    else:
-        return False
+    def isInBorder(self, row, column):
+        if row < 0 or row > self.size-1 or column < 0 or column > self.size-1:
+            return False # out of border
+        else:
+            return True # in the border
 
 
+    def isEmpty(self, row, column):
+        '''
+        check if board[row][column] is empty
+        empty          : return True
+        not empty      : return False
+        wrong position : return -1
+        '''
 
+        if not self.isInBorder(row, column):
+            print("wrong position")
+            return -1
 
-
-def colorCheck(board, row, column, BorW):
-    '''
-    check stone color is the same as that of BorW (if stone exists there).
-    same : return True
-    not same : return False
-    empty : return None
-    '''
-
-    size = len(board[0])
-    if row < 0 or row > size-1 or column < 0 or column > size-1:
-        #print(row, column)
-        #print("wrong position")
-        return 'error'
-
-    if BorW == 'B':
-        if board[row][column] == 1:
+        if self.board[row][column] == 0:
             return True
-        elif board[row][column] == -1:
+        else:
             return False
+
+
+    def getColorOfStone(self, row, column):
+        '''
+        Get color of stone at board[row][column]
+        Black : return 'B'
+        White : return 'W'
+        Empty : return 'empty'
+        '''
+        if self.board[row][column] == 1:
+            return 'B'
+        elif self.board[row][column] == -1:
+            return 'W'
+        else:
+            return 'empty'
+
+
+    def colorCheck(self, row, column, BorW):
+        '''
+        "is the color of this BorW?"
+        check stone color is the same as that of BorW (if stone exists there).
+        same           : return True
+        not same       : return False
+        empty          : return None
+        wrong position : return -1
+        '''
+
+        if not self.isInBorder(row, column):
+            print("wrong position")
+            return -1
+
+        if BorW == 'B':
+            if self.board[row][column] == 1:
+                return True
+            elif self.board[row][column] == -1:
+                return False
+            else:
+                return None
+
+        elif BorW == 'W':
+            #print(row, column)
+            if self.board[row][column] == -1:
+                return True
+            elif self.board[row][column] == 1:
+                return False
+            else:
+                return None
+
+
+    def putStoneOnBoard(self, row, column, BorW):
+        '''
+        put stone of the same color as BorW on the position board[row][column]
+        '''
+
+        # border check
+        if self.isInBorder(row, column) == False:
+            print("Out of border!")
+            return False
+
+        # check availability
+        if not self.isEmpty(row, column):
+            print("not empty")
+            return False
+
+        # 33 rule check
+        if self.check33_violation(row, column, BorW) == True:
+            print("3*3 rule violated. choose another position")
+            return False
+
+        if BorW == 'W':
+            self.board[row][column] = -1 # 흑은 board 행렬상에서 1로
+        elif BorW == 'B':
+            self.board[row][column] = 1  # 백은 board 행렬상에서 -1로
+
+
+    def check33_violation(self, row, column, BorW):
+        '''
+        Check if 3*3 rule is violated
+        violated     : return True
+        not violated : return False
+        '''
+
+        direction = [(1, 0), (1, -1), (0, -1), (-1, -1)] # → ↘ ↓ ↙
+        color = BorW
+        cnt_33 = 0
+        ref_point_x = row
+        ref_point_y = column
+
+        for i in range(4):
+
+            stone_cnt = 1
+            blank_cnt = 0
+            block_flag = None
+            # i = 0 -> check direction[0]
+            drow = direction[i][0]
+            dcolumn = direction[i][1]
+            drow_ = -direction[i][0]
+            dcolumn_ = -direction[i][1]
+
+
+            for j in range(1, 5):
+                if not self.isInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
+                    # same color stone
+                    stone_cnt += 1
+                elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == None:
+                    # empty
+                    blank_cnt += 1
+                    if blank_cnt == 2:
+                        blank_cnt = 0
+                        break
+                else:
+                    # different color stone
+                    if blank_cnt < 2:
+                        block_flag = True
+                    break
+
+            # stop counting if blocked with different color stone
+            if block_flag == True:
+                break
+
+            # inverse direction
+            blank_cnt = 0
+            for j in range(1, 5):
+                if not self.isInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
+                    # same color stone
+                    stone_cnt += 1
+                elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == None:
+                    # empty
+                    blank_cnt += 1
+                    if blank_cnt == 2:
+                        blank_cnt = 0
+                        break
+                else:
+                    # different color stone
+                    if blank_cnt < 2:
+                        block_cnt = True
+                    break
+
+            # stop counting if blocked with different color stone
+            if block_flag == True:
+                break
+
+            #print(cnt)
+            if stone_cnt == 3:
+                cnt_33 += 1
+
+            #print(cnt_33)
+            if cnt_33 == 2:
+                #print("3*3 rule violated")
+                return True
+
+        return False
+
+
+    def winCount(self, row, column, BorW):
+        '''
+        check stone number in a row for 8 directions
+        if BorW wins : return True
+        other cases  : return False
+        '''
+
+        direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
+        stone_cnt = 1
+        color = BorW
+        ref_point_x = row
+        ref_point_y = column
+
+        for i in range(4):
+            # i = 0 -> check direction[0]
+            drow = direction[i][0]
+            dcolumn = direction[i][1]
+            drow_ = -direction[i][0]
+            dcolumn_ = -direction[i][1]
+
+
+            for j in range(1, 5):
+                if not self.isInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
+                    stone_cnt += 1
+                else:
+                    break
+
+            # inverse direction
+            for j in range(1, 5):
+                if not self.isInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
+                    stone_cnt += 1
+                else:
+                    break
+
+            #print(cnt)
+            if stone_cnt >= 5 :
+                break
+            else:
+                stone_cnt = 1
+
+        if stone_cnt == 5:
+            return True
         else:
             return None
 
-    elif BorW == 'W':
-        #print(row, column)
-        if board[row][column] == -1:
-            return True
-        elif board[row][column] == 1:
+
+    def defenseCheck(self, row, column, BorW):
+
+        if self.check33_violation(row, column, BorW) == True:
             return False
-        else:
-            return None
 
+        direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
+        color = BorW
+        ref_point_x = row
+        ref_point_y = column
 
-def putStoneOnBoard(board, row, column, BorW):
-    '''
-    put stone of the same color as BorW on the position board[row][column]
-    '''
+        cnt_list = []
+        direction_list = []
+        for i in range(4):
+            stone_cnt = 1
+            stone_cnt_ = 1
+            blank_cnt = 0
+            blank_cnt_ = 0
+            blank_idx = []
+            blank_idx_ = []
+            block_flag = None
+            block_flag_ = None
+            block_idx = None
+            block_idx_ = None
 
-    # check availability
-    if not isEmpty(board, row, column):
-        print("not empty")
-        return False
+            # i = 0 -> check direction[0]
+            drow = direction[i][0]
+            dcolumn = direction[i][1]
+            drow_ = -direction[i][0]
+            dcolumn_ = -direction[i][1]
 
-    # 33 rule check
-    if check33_violation(board, row, column, BorW) == True:
-        print("3*3 rule violated. choose another position")
-        return False
+            for j in range(1, 6): # 레퍼런스 기준으로 +- 5개 위치 확인
+                if not self.isInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn):
+                    continue
 
-    # border check
-    if IsInBorder(row, column, len(board)) == False:
-        print("Out of border!")
-        return False
-    if BorW == 'W':
-        board[row][column] = -1 # 흑은 board 행렬상에서 1로
-    elif BorW == 'B':
-        board[row][column] = 1  # 백은 board 행렬상에서 -1로
-
-
-
-
-def winCount(board, row, column, BorW):
-    '''
-    check stone number in a row for 8 directions
-    if BorW wins : return True
-    other cases  : return False
-    '''
-
-    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
-    cnt = 1
-    color = BorW
-    ref_point_x = row
-    ref_point_y = column
-
-    for i in range(4):
-        # i = 0 -> check direction[0]
-        drow = direction[i][0]
-        dcolumn = direction[i][1]
-        drow_ = -direction[i][0]
-        dcolumn_ = -direction[i][1]
-
-
-        for j in range(1, 5):
-            if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color):
-                cnt += 1
-            else:
-                break
-
-        # inverse direction
-        for j in range(1, 5):
-            if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color):
-                cnt += 1
-            else:
-                break
-
-        #print(cnt)
-        if cnt >= 5 :
-            break
-        else:
-            cnt = 1
-
-    if cnt == 5:
-        return True
-    else:
-        return None
-
-
-
-
-
-def cntStoneInDirection(board, row, column, BorW, with_direction=False):
-
-    direction = [(0, 1), (1, 1), (1, 0), (1, -1)] # (row_direction, colum_direction) → ↘ ↓ ↙
-    cnt = 1
-    color = BorW
-    ref_point_x = row
-    ref_point_y = column
-
-    cnt_list = []
-    direction_list = []
-    for i in range(4):
-        # i = 0 -> check direction[0]
-        drow = direction[i][0]
-        dcolumn = direction[i][1]
-        drow_ = -direction[i][0]
-        dcolumn_ = -direction[i][1]
-
-
-        for j in range(1, 6): # 레퍼런스 기준으로 +- 5개 위치 확인
-            if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
-                #print("first")
-                cnt += 1
-
-            elif colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == False: # 막혀있는지 확인
-                #print("second")
-                cnt -= 1
-                break
-            elif colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == None:
-                #print("third")
-                if colorCheck(board, ref_point_x + (j+1)*drow, ref_point_y + (j+1)*dcolumn, color) == None:
+                if self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
+                    # same color stone
+                    stone_cnt += 1
+                elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == False:
+                    # different color stone(blocked)
+                    # if stone_cnt == 4 and blank_cnt == 1:
+                    #     block_flag = None
+                    #else:
+                    block_flag = True
+                    block_idx = j
                     break
-            else: # out of border
-                cnt -= 1
-                break
-            #print(cnt)
-        #print(direction[i], "정방향 = ", cnt)
+                elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == None:
+                    # empty
+                    blank_cnt += 1
+                    blank_idx.append(j)
+                    if blank_cnt == 2:
+                        if blank_idx[1] - blank_idx[0] == 1: # if continuous blank
+                            blank_cnt = 0
+                            break
 
-        # inverse direction
-        for j in range(1, 6):
-            if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
-                #print("first-")
-                cnt += 1
-
-            elif colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == False:
-                #print("second-")
-                cnt -= 1
-                break
-            elif colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == None:
-                #print("third-")
-                if colorCheck(board, ref_point_x + (j+1)*drow_, ref_point_y + (j+1)*dcolumn_, color) == None:
+                else: # out of border
+                    block_flag = True
+                    block_idx = j
                     break
-            else: # out of border
-                cnt -= 1
-                break
-            #print(cnt)
-        #print(direction[i], "역방향 = ", cnt)
 
 
-        cnt_list.append(cnt)
-        direction_list.append(direction[i])
-        cnt = 1
+            # inverse direction
+            for j in range(1, 6):
+                if not self.isInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_):
+                    continue
 
-    #print(cnt_list)
-    if with_direction == True:
-        return direction_list[cnt_list.index(max(cnt_list))], max(cnt_list)
-    else:
+                if self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
+                    # same color stone
+                    stone_cnt_ += 1
+                elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == False:
+                    # different color stone(blocked)
+                    # if stone_cnt_ == 4 and blank_cnt_ == 1:
+                    #     # o_xxxv
+                    #     block_flag_ = None
+                    #else:
+                    block_flag_ = True
+                    block_idx_ = j
+                    break
+                elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == None:
+                    # empty
+                    blank_cnt_ += 1
+                    blank_idx_.append(j)
+                    if blank_cnt_ == 2:
+                        if blank_idx_[1] - blank_idx_[0] == 1: # if continuous blank
+                            blank_cnt_ = 0
+                            break
+                else: # out of border
+                    block_flag_ = True
+                    block_idx_ = j
+                    break
+
+            total_stone = stone_cnt + stone_cnt_ - 1
+
+            if block_flag == True and block_flag_ == True:
+                if total_stone == 5:
+                    return True
+                elif total_stone == 4 and blank_cnt == 1 and blank_cnt_ == 1:
+                    if block_idx - blank_idx[0] == 1 and \
+                                    block_idx_ - blank_idx_[0] == 1:
+                        # o_xvxx_o
+                        return True
+                else:
+                    return False
+
+            if block_flag == True and block_flag_ == None:
+                if total_stone == 5:
+                    return True
+                elif total_stone == 4 and blank_cnt == 1:
+                    if blank_idx[0] == 4:
+                    # o_xxxv
+                        return True
+                    elif blank_idx[0] == 1:
+                    # oxxx_v
+                        return False
+
+            if block_flag == None and block_flag_ == True:
+                if total_stone == 5:
+                    return True
+                elif total_stone == 4 and blank_cnt_ == 1:
+                    if blank_idx_[0] == 4:
+                    # o_xxxv
+                        return True
+                    elif blank_idx_[0] == 1:
+                    # oxxx_v
+                        return False
+
+            if block_flag == None and block_flag_ == None:
+                if total_stone == 5:
+                    if blank_cnt != 0 or blank_cnt_ != 0:
+                        return False
+
+                    return True
+                elif total_stone == 4:
+                    if blank_cnt >= 1 or blank_cnt_ >= 1:
+                        return False
+                    else:
+                        return True
+
+
+    def cntStonesInTheSameLine(self, row, column, BorW):
+
+        # (row_direction, colum_direction) → ↘ ↓ ↙
+        direction = [(0, 1), (1, 1), (1, 0), (1, -1)]
+        color = BorW
+        ref_point_x = row
+        ref_point_y = column
+
+        cnt_list = []
+        for i in range(4):
+            stone_cnt = 1
+            stone_cnt_ = 1
+            blank_cnt = 0
+            blank_cnt_ = 0
+            blank_idx = []
+            blank_idx_ = []
+            block_flag = None
+            block_flag_ = None
+            block_idx = None
+            block_idx_ = None
+
+            # i = 0 -> check direction[0]
+            drow = direction[i][0]
+            dcolumn = direction[i][1]
+            drow_ = -direction[i][0]
+            dcolumn_ = -direction[i][1]
+
+            for j in range(1, 6): # 레퍼런스 기준으로 +- 5개 위치 확인
+                if not self.isInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == True:
+                    # same color stone
+                    stone_cnt += 1
+                elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == False:
+                    # different color stone(blocked)
+                    if stone_cnt == 4 and blank_cnt == 1:
+                        block_flag = None
+                    else:
+                        block_flag = True
+                        block_idx = j
+                        stone_cnt -= 1
+                        break
+                elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == None:
+                    # empty
+                    blank_cnt += 1
+                    blank_idx.append(j)
+                    if blank_cnt == 2:
+                        if blank_idx[1] - blank_idx[0] == 1: # if continuous blank
+                            break
+                else:
+                    # out of border
+                    block_flag = True
+                    block_idx = j
+                    stone_cnt -= 1
+                    break
+
+
+            # inverse direction
+            for j in range(1, 6):
+                if not self.isInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_):
+                    continue
+
+                if self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == True:
+                    # same color stone
+                    stone_cnt_ += 1
+                elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == False:
+                    # different color stone(blocked)
+                    if stone_cnt_ == 4 and blank_cnt_ == 1:
+                        block_flag_ = None
+                    else:
+                        block_flag_ = True
+                        block_idx_ = j
+                        stone_cnt_ -= 1
+                        break
+                elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == None:
+                    # empty
+                    blank_cnt_ += 1
+                    blank_idx_.append(j)
+                    if blank_cnt_ == 2:
+                        if blank_idx_[1] - blank_idx_[0] == 1: # if continuous blank
+                            break
+                else: # out of border
+                    block_flag_ = True
+                    block_idx_ = j
+                    stone_cnt_ -= 1
+                    break
+
+            total_stone = stone_cnt + stone_cnt_ - 1
+            cnt_list.append(total_stone)
+
         return max(cnt_list)
 
 
+    def boardToInputFeature(self):
+        gameBoard_B = np.zeros([15, 15], dtype=np.float32)
+        gameBoard_W = np.zeros([15, 15], dtype=np.float32)
+        gameBoard_E = np.ones([15, 15], dtype=np.float32)
+        input_tensor = np.zeros([3, 15, 15], dtype=np.float32)
 
 
+        for i in range(self.size):
+            for j in range(self.size):
+                if self.board[i][j] == 1:
+                    gameBoard_B[i][j] = 1
+                elif self.board[i][j] == -1:
+                    gameBoard_W[i][j] = 1
+                else:
+                    gameBoard_E[i][j] = 1
+
+        input_tensor[0] = gameBoard_B.copy()
+        input_tensor[1] = gameBoard_W.copy()
+        input_tensor[2] = gameBoard_E.copy()
+        input_tensor = np.transpose(input_tensor, (1,2,0))
+
+        return input_tensor
 
 
-def check33_violation(board, row, column, BorW):
-    '''
-    Check if 3*3 rule is violated
-    violated     : return True
-    not violated : return False
-    '''
-
-    direction = [(1, 0), (1, -1), (0, -1), (-1, -1)] # → ↘ ↓ ↙
-    color = BorW
-    cnt = 1
-    cnt_33 = 0
-    ref_point_x = row
-    ref_point_y = column
-
-    for i in range(4):
-        # i = 0 -> check direction[0]
-        drow = direction[i][0]
-        dcolumn = direction[i][1]
-        drow_ = -direction[i][0]
-        dcolumn_ = -direction[i][1]
-
-
-        for j in range(1, 5):
-            if not IsInBorder(ref_point_x + j*drow, ref_point_y + j*dcolumn, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow, ref_point_y + j*dcolumn, color):
-                cnt += 1
-            else:
-                break
-
-        # inverse direction
-        for j in range(1, 5):
-            if not IsInBorder(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, len(board[0])):
-                continue
-
-            if colorCheck(board, ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color):
-                cnt += 1
-            else:
-                break
-
-        #print(cnt)
-        if cnt == 3:
-            cnt_33 += 1
-            cnt = 1
+    def winCheck(self, row, column, BorW):
+        if self.winCount(row, column, BorW) == True:
+            return BorW
         else:
-            cnt = 1
-
-        #print(cnt_33)
-        if cnt_33 == 2:
-            #print("3*3 rule violated")
-            return True
-
-    return False
+            return False
 
 
+    def findWinner(self):
+        # Check if there is a winner
+        for row in range(self.size):
+            for column in range(self.size):
+                color = self.getColorOfStone(row, column)
+                if self.winCheck(row, column, color) == color:
+                    return color
+
+        return None
 
 
-def IsInBorder(row, column, size):
-    if row < 0 or row > size-1 or column < 0 or column > size-1:
-        return False # out of border
-    else:
-        return True # in the border
+if __name__ == "__main__":
+    b = Board(15, "EMPTY")
+
+    b.putStoneOnBoard(7, 9, 'B')
+    #b.putStoneOnBoard(8, 8, 'B')
+    #b.putStoneOnBoard(5, 9, 'B')
+    #b.putStoneOnBoard(6, 8, 'B')
+    b.putStoneOnBoard(7, 7, 'B')
+    #b.putStoneOnBoard(7, 3, 'B')
+    #b.putStoneOnBoard(9, 5, 'B')
+    b.drawCurrentBoard()
+
+    print(b.defenseCheck(7, 5, 'B'))
