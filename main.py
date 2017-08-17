@@ -6,6 +6,9 @@ from omokboard import Board
 import mcts
 import copy
 import random
+import tensorflow as tf
+import os
+from cnn import Model
 '''
 board = ob.getEmptyBoard(15)
 
@@ -41,8 +44,6 @@ ob.drawCurrentBoard(board)
 '''
 
 
-
-
 gameBoard = Board(15, "EMPTY")
 while True:
     gameBoard.drawCurrentBoard()
@@ -66,7 +67,7 @@ while True:
     #root.printNodeInfo()
     #rest = input()
     nextmove = None
-    if root.actionsLength >= 222:
+    if root.nstone <= 2: # 원래 222
         # 1~2 번째 수를 둬야할 경우
         nextmove = mcts.getEarlyStageAction(root.board, root.currentAction)
     else:

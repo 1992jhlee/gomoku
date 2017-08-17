@@ -9,6 +9,7 @@ import os
 import tensorflow as tf
 #import cnn
 from omokboard import Board
+from omokboard import renewNextActions
 from node import Node
 
 selection_counter = 0
@@ -51,9 +52,7 @@ def expansion(node):
     while True:
 
         nextboard = copy.deepcopy(node.board)
-        nextaction = rolloutPolicy(nextboard, node.nextActions, node.currentPlayer)
-        #idx = random.randint(0, node.actionsLength-1)
-        #nextaction = node.nextActions[idx]
+        nextaction = rolloutPolicy(nextboard, node.nextActions, node.opponent)
 
         if nextboard.putStoneOnBoard(nextaction[0], nextaction[1], node.opponent) == False:
             continue
@@ -151,25 +150,26 @@ def rollout(node):
 
     # simulation
     temp_board = copy.deepcopy(node.board)
-    temp_nextActions = copy.deepcopy(node.nextActions)
     currentPlayer = node.currentPlayer
     winner = None
     while True:
         # player change
         currentPlayer = node.board.getOpponentPlayer(currentPlayer)
 
-         # next action chosen by rollout policy
+        # renew possible actions
+        temp_nextActions = renewNextActions(temp_board, currentPlayer)
+
+        # next action chosen by rollout policy
         nextmove = rolloutPolicy(temp_board, temp_nextActions, currentPlayer)
-        del(temp_nextActions[temp_nextActions.index(nextmove)])
-        #print("nextmove = ", nextmove)
+        print("nextmove = ", nextmove)
 
         if temp_board.putStoneOnBoard(nextmove[0], nextmove[1], currentPlayer) == False:
             continue
 
-        # ob.drawCurrentBoard(temp_board)
+        temp_board.drawCurrentBoard()
         winner = temp_board.winCheck(nextmove[0], nextmove[1], currentPlayer)
         #print("winner = ", winner)
-        #a = input()
+        a = input()
 
         if winner == False and len(temp_nextActions) > 0:
             continue
@@ -192,7 +192,6 @@ def rolloutPolicy(board, nextActions, currentPlayer):
     cnt_4 = []
     cnt_3 = []
     cnt_2 = []
-    others = []
     nextmove = None
     random_actions = copy.deepcopy(nextActions)
     radnom_actions = random.shuffle(random_actions)
@@ -219,23 +218,22 @@ def rolloutPolicy(board, nextActions, currentPlayer):
             cnt_3.append(action)
         elif my_cnt == 2:
             cnt_2.append(action)
-        else:
-            others.append(action)
+
     # for문 종료
 
     if nextmove == None:
         if len(cnt_4) > 0:
-            print("cnt_4 position selected")
             nextmove = random.choice(cnt_4)
+            print("cnt_4 position selected : ", nextmove)
         elif len(cnt_3) > 0:
-            print("cnt_3 position selected")
             nextmove = random.choice(cnt_3)
+            print("cnt_3 position selected : ", nextmove)
         elif len(cnt_2) > 0:
-            print("cnt_2 position selected")
             nextmove = random.choice(cnt_2)
+            print("cnt_2 position selected : ", nextmove)
         else:
-            print("dense position selected")
             nextmove = getDensePlace(board, nextActions)
+            print("dense position selected : ", nextmove)
 
     return nextmove
 
@@ -276,27 +274,26 @@ def getDensePlace(board, nextActions):
     '''
 
     directions = [(0, 1), (1, 1), (1, 0), (1, -1)]
-    empty_cnt_list = []
-    empty_cnt = 0
+    min_empty_cnt = 8
+    densePlaces = []
     for action in nextActions:
+        if 0 in action:
+            continue
+
+        empty_cnt = 0
         for direction in directions:
+
             if board.isEmpty(action[0] + direction[0], action[1] + direction[0]) == True:
-                print([action[0] + direction[0], action[1] + direction[0]])
                 empty_cnt += 1
-            else:
-                pass
 
             if board.isEmpty(action[0] - direction[0], action[1] - direction[0]) == True:
                 empty_cnt += 1
-            else:
-                pass
 
-        empty_cnt_list.append(empty_cnt)
+        print(action, " : ", empty_cnt)
+        if empty_cnt < min_empty_cnt:
+            densePlaces.append(action)
 
-    idx = empty_cnt_list.index(min(empty_cnt_list))
-    densePlace = nextActions[idx]
-
-    return densePlace
+    return random.choice(densePlaces)
 
 
 

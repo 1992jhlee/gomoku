@@ -145,7 +145,7 @@ class Board:
         '''
 
         if not self.isInBorder(row, column):
-            print("wrong position")
+            print("wrong position(out of border)")
             return -1
 
         if self.board[row][column] == 0:
@@ -180,7 +180,7 @@ class Board:
         '''
 
         if not self.isInBorder(row, column):
-            print("wrong position")
+            print("wrong position(out of border)")
             return -1
 
         if BorW == 'B':
@@ -244,6 +244,7 @@ class Board:
 
             stone_cnt = 1
             blank_cnt = 0
+            blank_idx = 0
             block_flag = None
             # i = 0 -> check direction[0]
             drow = direction[i][0]
@@ -262,12 +263,15 @@ class Board:
                 elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == None:
                     # empty
                     blank_cnt += 1
+                    blank_idx = j
                     if blank_cnt == 2:
                         blank_cnt = 0
                         break
                 else:
                     # different color stone
-                    if blank_cnt < 2:
+                    if abs(j - blank_idx) == 1:
+                        block_flag = False
+                    elif blank_cnt < 2:
                         block_flag = True
                     break
 
@@ -287,12 +291,15 @@ class Board:
                 elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == None:
                     # empty
                     blank_cnt += 1
+                    blank_idx = j
                     if blank_cnt == 2:
                         blank_cnt = 0
                         break
                 else:
                     # different color stone
-                    if blank_cnt < 2:
+                    if abs(j - blank_idx) == 1:
+                        block_cnt = False
+                    elif blank_cnt < 2:
                         block_cnt = True
                     break
 
@@ -306,7 +313,6 @@ class Board:
 
             #print(cnt_33)
             if cnt_33 == 2:
-                #print("3*3 rule violated")
                 return True
 
         return False
@@ -374,8 +380,7 @@ class Board:
         ref_point_x = row
         ref_point_y = column
 
-        cnt_list = []
-        direction_list = []
+        defenseCheck_by_direction = []
         for i in range(4):
             stone_cnt = 1
             stone_cnt_ = 1
@@ -458,48 +463,54 @@ class Board:
 
             if block_flag == True and block_flag_ == True:
                 if total_stone == 5:
-                    return True
+                    defenseCheck_by_direction.append(True)
                 elif total_stone == 4 and blank_cnt == 1 and blank_cnt_ == 1:
                     if block_idx - blank_idx[0] == 1 and \
                                     block_idx_ - blank_idx_[0] == 1:
                         # o_xvxx_o
-                        return True
+                        defenseCheck_by_direction.append(True)
                 else:
-                    return False
+                    defenseCheck_by_direction.append(False)
 
             if block_flag == True and block_flag_ == None:
                 if total_stone == 5:
-                    return True
+                    defenseCheck_by_direction.append(True)
                 elif total_stone == 4 and blank_cnt == 1:
                     if blank_idx[0] == 4:
                     # o_xxxv
-                        return True
+                        defenseCheck_by_direction.append(True)
                     elif blank_idx[0] == 1:
                     # oxxx_v
-                        return False
+                        defenseCheck_by_direction.append(False)
 
             if block_flag == None and block_flag_ == True:
                 if total_stone == 5:
-                    return True
+                    defenseCheck_by_direction.append(True)
                 elif total_stone == 4 and blank_cnt_ == 1:
                     if blank_idx_[0] == 4:
                     # o_xxxv
-                        return True
+                        defenseCheck_by_direction.append(True)
                     elif blank_idx_[0] == 1:
                     # oxxx_v
-                        return False
+                        defenseCheck_by_direction.append(False)
 
             if block_flag == None and block_flag_ == None:
                 if total_stone == 5:
                     if blank_cnt != 0 or blank_cnt_ != 0:
-                        return False
-
-                    return True
+                        defenseCheck_by_direction.append(False)
+                    else:
+                        defenseCheck_by_direction.append(True)
                 elif total_stone == 4:
                     if blank_cnt >= 1 or blank_cnt_ >= 1:
-                        return False
+                        defenseCheck_by_direction.append(False)
                     else:
-                        return True
+                        defenseCheck_by_direction.append(True)
+
+            #print(defenseCheck_by_direction)
+            if True in defenseCheck_by_direction:
+                return True
+
+        return False
 
 
     def cntStonesInTheSameLine(self, row, column, BorW):
@@ -538,8 +549,11 @@ class Board:
                     stone_cnt += 1
                 elif self.colorCheck(ref_point_x + j*drow, ref_point_y + j*dcolumn, color) == False:
                     # different color stone(blocked)
-                    if stone_cnt == 4 and blank_cnt == 1:
-                        block_flag = None
+                    if stone_cnt == 4:
+                        if blank_cnt == 1:
+                            block_flag = None
+                        else:
+                            blog_flag =True
                     else:
                         block_flag = True
                         block_idx = j
@@ -551,6 +565,7 @@ class Board:
                     blank_idx.append(j)
                     if blank_cnt == 2:
                         if blank_idx[1] - blank_idx[0] == 1: # if continuous blank
+                            blank_cnt = 0
                             break
                 else:
                     # out of border
@@ -570,8 +585,11 @@ class Board:
                     stone_cnt_ += 1
                 elif self.colorCheck(ref_point_x + j*drow_, ref_point_y + j*dcolumn_, color) == False:
                     # different color stone(blocked)
-                    if stone_cnt_ == 4 and blank_cnt_ == 1:
-                        block_flag_ = None
+                    if stone_cnt_ == 4:
+                        if blank_cnt_ == 1:
+                            block_flag_ = None
+                        else:
+                            block_flag_ = True
                     else:
                         block_flag_ = True
                         block_idx_ = j
@@ -583,6 +601,7 @@ class Board:
                     blank_idx_.append(j)
                     if blank_cnt_ == 2:
                         if blank_idx_[1] - blank_idx_[0] == 1: # if continuous blank
+                            blank_cnt_ = 0
                             break
                 else: # out of border
                     block_flag_ = True
@@ -591,6 +610,14 @@ class Board:
                     break
 
             total_stone = stone_cnt + stone_cnt_ - 1
+            total_blank = blank_cnt + blank_cnt_
+            if total_stone == 2:
+                if total_blank != 0:
+                    total_stone = 1
+            elif total_stone == 3:
+                if total_blank >= 2:
+                    total_stone = 1
+
             cnt_list.append(total_stone)
 
         return max(cnt_list)
@@ -638,16 +665,90 @@ class Board:
         return None
 
 
+    def getLimit(self):
+        row_lower_limit = 14
+        row_upper_limit = 0
+        col_lower_limit = 14
+        col_upper_limit = 0
+
+        for row in range(self.size):
+            for column in range(self.size):
+                if self.board[row][column] != 0:
+                    if row < row_lower_limit:
+                        row_lower_limit = row
+                    if row > row_upper_limit:
+                        row_upper_limit = row
+                    if column < col_lower_limit:
+                        col_lower_limit = column
+                    if column < col_lower_limit:
+                        col_lower_limit = column
+
+        return row_lower_limit, row_upper_limit, col_lower_limit, col_upper_limit
+
+
+    def getNumberOfStones(self):
+        cnt = 0
+        for row in range(self.size):
+            cnt += self.board[row].count(1)
+            cnt += self.board[row].count(-1)
+
+        return cnt
+
+
+def renewNextActions(board, currentPlayer):
+
+    row_lower_limit = 14
+    row_upper_limit = 0
+    col_lower_limit = 14
+    col_upper_limit = 0
+
+    for row in range(board.size):
+        for column in range(board.size):
+            if board.board[row][column] != 0:
+                if row < row_lower_limit:
+                    row_lower_limit = row
+                if row > row_upper_limit:
+                    row_upper_limit = row
+                if column < col_lower_limit:
+                    col_lower_limit = column
+                if column > col_upper_limit:
+                    col_upper_limit = column
+
+    row_lower_limit = max(row_lower_limit-2, 0)
+    row_upper_limit = min(row_upper_limit+2, 14)
+    col_lower_limit = max(col_lower_limit-2, 0)
+    col_upper_limit = min(col_upper_limit+2, 14)
+
+    nextActions = []
+    for row in range(row_lower_limit, row_upper_limit+1):
+        for column in range(col_lower_limit, col_upper_limit+1):
+            if board.isEmpty(row, column) == True and \
+                board.check33_violation(row, column, currentPlayer) == False:
+                nextActions.append([row, column])
+
+    print("renewed : ", nextActions)
+    return nextActions
+
+
+
+
 if __name__ == "__main__":
     b = Board(15, "EMPTY")
 
-    b.putStoneOnBoard(7, 9, 'B')
-    #b.putStoneOnBoard(8, 8, 'B')
-    #b.putStoneOnBoard(5, 9, 'B')
-    #b.putStoneOnBoard(6, 8, 'B')
     b.putStoneOnBoard(7, 7, 'B')
-    #b.putStoneOnBoard(7, 3, 'B')
-    #b.putStoneOnBoard(9, 5, 'B')
+    b.putStoneOnBoard(6, 6, 'B')
+    b.putStoneOnBoard(8, 8, 'B')
+    b.putStoneOnBoard(9, 9, 'W')
+    #b.putStoneOnBoard(6, 7, 'W')
+    #b.putStoneOnBoard(5, 8, 'B')
+    #b.putStoneOnBoard(6, 6, 'B')
+    #b.putStoneOnBoard(8, 8, 'W')
+    #b.putStoneOnBoard(9, 7, 'W')
+    #b.putStoneOnBoard(5, 7, 'W')
+    #b.putStoneOnBoard(7, 5, 'W')
+    #b.putStoneOnBoard(5, 5, 'B')
+
+
     b.drawCurrentBoard()
 
-    print(b.defenseCheck(7, 5, 'B'))
+    print(b.cntStonesInTheSameLine(5, 5, 'B'))
