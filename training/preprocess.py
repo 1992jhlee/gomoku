@@ -79,6 +79,7 @@ except:
     print(k)
 
 print("raw data processing...fisined\n")
+print(len(input_features), "data created")
 # 여기까지 최종적으로 k개의 게임데이터에서 뽑아낸 (s, a)가 만들어지는데
 # s는 input_features, a는 labels에 저장된다.
 # s는 (15, 15, 3), a는 (1, 225)
