@@ -33,6 +33,8 @@ with tf.Session() as sess:
             else:
                 break
 
+        if gameboard.findWinner() == 'B':
+            break
 
         root = Node(gameBoard.board, [my_action_row, my_action_col], 'B', m)
         root.visits = 1
@@ -68,7 +70,7 @@ with tf.Session() as sess:
                         print("opponent's winninge position selected : ", defense_pos_2)
                         nextmove = defense_pos_2
 
-            if nextmove = None:
+            if nextmove == None:
                 nextmove_candidates = []
                 for action in random_actions:
                     # defence check
