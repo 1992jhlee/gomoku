@@ -10,6 +10,8 @@ import tensorflow as tf
 #import cnn
 from omokboard import Board
 from omokboard import renewNextActions
+from omokboard import getPromisingActions
+from omokboard import getFavorablePosition
 from node import Node
 
 selection_counter = 0
@@ -27,7 +29,6 @@ def selection(current):
         return None
 
     while True: # 게임이 끝나거나 둘 곳이 없으면 작동 x
-
         if current.actionsLength > 0: # if not fully expanded
             newnode = expansion(current)
             print("newnode created")
@@ -48,7 +49,6 @@ def expansion(node):
     expansion_counter += 1
     print("expansion started...", expansion_counter)
 
-
     while True:
 
         nextboard = copy.deepcopy(node.board)
@@ -57,14 +57,25 @@ def expansion(node):
         if nextboard.putStoneOnBoard(nextaction[0], nextaction[1], node.opponent) == False:
             continue
 
-        newnode = Node(nextboard.board, nextaction, node.opponent)
+        newnode = Node(nextboard.board, nextaction, node.opponent, node.using_model)
         newnode.parent = node
+
+        # score = self.ubtValue + self.parent.prob_distrib[currentAction]
+        # [row, column] -> [coord_x, coord_y]
+        # row = 14 - coord_y
+        # column = coord_x
+        coord_x = newnode.currentAction[1]
+        coord_y = 14 - newnode.currentAction[0]
+        idx = coord_x + 15*coord_y
+        prob_distrib = newnode.parent.prob_distrib[idx]
+        newnode.score = prob_distrib
+
         break
 
     # update parent node
     node.children.append(newnode)
-    del(node.nextActions[node.nextActions.index(nextaction)])
-    node.actionsLength -= 1
+    #del(node.nextActions[node.nextActions.index(nextaction)])
+    #node.actionsLength -= 1
 
     return newnode
 
@@ -79,29 +90,17 @@ def backprop(current, value):
         current.visits += 1
         current.wins += value
         current.ubtValue = (current.wins / current.visits) + 2*1.44*math.sqrt((2*math.log10(current.parent.visits)) / current.visits)
+        current.score += current.ubtValue
         current = current.parent
         if current.parent == None:
             break
 
 
 def getBestChild(node, getChildList=False):
-    bestChildren = []
-    BestUBT = -1000
 
-    for child in node.children:
-
-        if child.ubtValue > BestUBT:
-            BestUBT = child.ubtValue
-            bestChildren.append(child)
-        elif child.ubtValue == BestUBT:
-            bestChildren.append(child)
-
-    bestChild = random.choice(bestChildren)
-
-    if getChildList == True:
-        return bestChild, bestChildren
-    else:
-        return bestChild
+    score_list = [child.score for child in node.children]
+    best_score = max(score_list)
+    return node.children[score_list.index(best_score)]
 
 
 def getBestAction(root, limit_time=10):
@@ -123,11 +122,9 @@ def getBestAction(root, limit_time=10):
             backprop_counter = 0
             break
 
-    bestChild, bestChildren = getBestChild(root, getChildList = True)
-
-    for i, child in enumerate(bestChildren):
-        print("child[%d] -> [%d, %d], wins = %d, visits = %d, ubtValue = %d" \
-    % (i, child.currentAction[0], child.currentAction[1], child.wins, child.visits, child.ubtValue))
+    bestChild = getBestChild(root)
+    print("bestchild -> [%d, %d], wins = %d, visits = %d, score = %f" \
+                % (bestChild.currentAction[0], bestChild.currentAction[1], bestChild.wins, bestChild.visits, bestChild.score))
 
     return bestChild.currentAction
 
@@ -153,11 +150,14 @@ def rollout(node):
     currentPlayer = node.currentPlayer
     winner = None
     while True:
+
         # player change
         currentPlayer = node.board.getOpponentPlayer(currentPlayer)
 
         # renew possible actions
         temp_nextActions = renewNextActions(temp_board, currentPlayer)
+        if len(temp_nextActions) == 0:
+            break
 
         # next action chosen by rollout policy
         nextmove = rolloutPolicy(temp_board, temp_nextActions, currentPlayer)
@@ -168,9 +168,10 @@ def rollout(node):
 
         temp_board.drawCurrentBoard()
         winner = temp_board.winCheck(nextmove[0], nextmove[1], currentPlayer)
-        #print("winner = ", winner)
-        a = input()
+        print("winner = ", winner)
+        #a = input()
 
+        print("len(temp_nextActions) = ", len(temp_nextActions))
         if winner == False and len(temp_nextActions) > 0:
             continue
         else:
@@ -182,8 +183,8 @@ def rollout(node):
         return 0
 
 
-def rolloutPolicy(board, nextActions, currentPlayer):
-    '''
+def rolloutPolicy(board, nextActions, currentPlayer, promisingActions=None):
+    '''s
     rollout policy for executing rollout
     first, check if there is a place to defend
     and then choose a place where the number of stones placed in line increased
@@ -197,19 +198,50 @@ def rolloutPolicy(board, nextActions, currentPlayer):
     radnom_actions = random.shuffle(random_actions)
     opponent = board.getOpponentPlayer(currentPlayer)
 
+    losing_pos = []
     for action in random_actions:
-        # check if there is current player's win position
+        # check if there is current player's winning position
         if board.winCheck(action[0], action[1], currentPlayer) == currentPlayer:
-            print("winning position selected")
-            nextmove = action
-            break
+            print("winning position selected : ", action)
+            return action
 
+        # check if there is opponent player's winning position
+        if board.winCheck(action[0], action[1], opponent) == opponent:
+            losing_pos.append(action)
+
+    if len(losing_pos) > 0:
+        defense_pos_1 = getFavorablePosition(board, losing_pos, currentPlayer)
+        defense_pos_2 = getFavorablePosition(board, losing_pos, opponent)
+        defense_pos_1_cnt = board.cntStonesForFavPos(defense_pos_1[0], defense_pos_2[1], currentPlayer)
+        defense_pos_2_cnt = board.cntStonesForFavPos(defense_pos_2[0], defense_pos_2[1], opponent)
+        if defense_pos_1_cnt >= defense_pos_2_cnt:
+            print("opponent's winning position selected : ", defense_pos_1)
+            return defense_pos_1
+        elif defense_pos_2_cnt > defense_pos_1_cnt:
+            print("opponent's winninge position selected : ", defense_pos_2)
+            return defense_pos_2
+
+
+    nextmove_candidates = []
+    for action in random_actions:
         # defence check
         if board.defenseCheck(action[0], action[1], opponent) == True:
-            print("defence position selected")
-            nextmove = action
-            break
+            nextmove_candidates.append(action)
 
+    if len(nextmove_candidates) > 0:
+        nextmove_1 = getFavorablePosition(board, nextmove_candidates, currentPlayer)
+        nextmove_2 = getFavorablePosition(board, nextmove_candidates, opponent)
+        nextmove_1_cnt = board.cntStonesForFavPos(nextmove_1[0], nextmove_1[1], currentPlayer)
+        nextmove_2_cnt = board.cntStonesForFavPos(nextmove_2[0], nextmove_2[1], opponent)
+        if nextmove_1_cnt >= nextmove_2_cnt:
+            print("defence position selected : ", nextmove_1)
+            return nextmove_1
+        elif nextmove_2_cnt > nextmove_1_cnt:
+            print("defence position selected : ", nextmove_2)
+            return nextmove_2
+
+
+    for action in random_actions:
         # find attack position
         my_cnt = board.cntStonesInTheSameLine(action[0], action[1], currentPlayer)
         if my_cnt == 4:
@@ -219,17 +251,16 @@ def rolloutPolicy(board, nextActions, currentPlayer):
         elif my_cnt == 2:
             cnt_2.append(action)
 
-    # for문 종료
 
     if nextmove == None:
         if len(cnt_4) > 0:
-            nextmove = random.choice(cnt_4)
+            nextmove = getFavorablePosition(board, cnt_4, currentPlayer)
             print("cnt_4 position selected : ", nextmove)
         elif len(cnt_3) > 0:
-            nextmove = random.choice(cnt_3)
+            nextmove = getFavorablePosition(board, cnt_3, currentPlayer)
             print("cnt_3 position selected : ", nextmove)
         elif len(cnt_2) > 0:
-            nextmove = random.choice(cnt_2)
+            nextmove = getFavorablePosition(board, cnt_2, currentPlayer)
             print("cnt_2 position selected : ", nextmove)
         else:
             nextmove = getDensePlace(board, nextActions)
@@ -273,12 +304,16 @@ def getDensePlace(board, nextActions):
     Find dense places by counting the number of stones around
     '''
 
+    print("in getDensPlace\n", len(nextActions))
+    board.drawCurrentBoard()
+    print(nextActions)
     directions = [(0, 1), (1, 1), (1, 0), (1, -1)]
     min_empty_cnt = 8
     densePlaces = []
     for action in nextActions:
         if 0 in action:
-            continue
+            if len(nextActions) > 10:
+                continue
 
         empty_cnt = 0
         for direction in directions:

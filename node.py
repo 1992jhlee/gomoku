@@ -27,8 +27,9 @@ class Node(Board):
         self.input_feature = self.board.boardToInputFeature()
 
         if model != None:
+            self.using_model = model
             self.prob_distrib = model.prediction(self.input_feature)
-            self.promisingActions = self.getPromisingActions()
+            self.score = 0
 
         self.gameFinished = self.isTerminal()
         #self.winner =
@@ -43,7 +44,7 @@ class Node(Board):
         row_lower_limit = max(row_lower_limit-2, 0)
         row_upper_limit = min(row_upper_limit+2, 14)
         col_lower_limit = max(col_lower_limit-2, 0)
-        col_upper_limit = min(col_lower_limit+2, 14)
+        col_upper_limit = min(col_upper_limit+2, 14)
 
         for row in range(row_lower_limit, row_upper_limit+1):
             for column in range(col_lower_limit, col_upper_limit+1):
@@ -53,21 +54,6 @@ class Node(Board):
                     nextActions.append([row, column])
 
         return nextActions, actionsLength
-
-
-    def getPromisingActions(self, howMany=7):
-        promisingActions = []
-
-        probs_sorted = sorted(self.prob_distrib, reverse=True)
-        for i in range(howMany):
-            bestIdx = self.prob_distrib.index(probs_sorted[i])
-            coord_x = int(bestIdx % 15)
-            coord_y = int(bestIdx / 15)
-            row = 14 - coord_y
-            column = coord_x
-            promisingActions.append([row, column])
-
-        return promisingActions
 
 
     def isTerminal(self):
@@ -93,7 +79,7 @@ class Node(Board):
         print("nstone : ", self.nstone)
         print("probability distribution : \n", self.prob_distrib)
         print("promisingActions : \n", self.promisingActions)
-
+        print("score : ", self.score)
 
 
 
